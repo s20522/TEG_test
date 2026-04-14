@@ -1,0 +1,46 @@
+services:
+  ollama-mistral:
+    build: .
+    container_name: ollama_service
+    volumes:
+      - ollama_storage:/root/.ollama
+    ports:
+      - "11434:11434"
+    networks:
+      - tmdb-network
+
+  neo4j:
+    image: neo4j:latest
+    container_name: neo4j_db
+    environment:
+      - NEO4J_AUTH=neo4j/password123
+      - NEO4J_PLUGINS=["apoc"]
+    ports:
+      - "7474:7474"
+      - "7687:7687"
+    volumes:
+      - neo4j_data:/data
+    networks:
+      - tmdb-network
+
+  chromadb:
+    image: ghcr.io/chroma-core/chroma:latest
+    container_name: chromadb_service
+    ports:
+      - "8000:8000"
+    volumes:
+      - chromadb_data:/chroma/data
+    environment:
+      - CHROMA_DB_IMPL=duckdb+parquet
+      - PERSIST_DIRECTORY=/chroma/data
+    networks:
+      - tmdb-network
+
+volumes:
+  ollama_storage:
+  neo4j_data:
+  chromadb_data:
+
+networks:
+  tmdb-network:
+    driver: bridge
