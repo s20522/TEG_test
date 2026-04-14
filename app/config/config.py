@@ -7,6 +7,8 @@ load_dotenv()
 # Ollama Configuration
 OLLAMA_HOST = os.getenv("OLLAMA_HOST", "http://ollama-mistral:11434")
 OLLAMA_MODEL = os.getenv("OLLAMA_MODEL", "mistral")
+OLLAMA_EMBED_MODEL = os.getenv("OLLAMA_EMBED_MODEL", "nomic-embed-text")
+OLLAMA_TIMEOUT = int(os.getenv("OLLAMA_TIMEOUT", "120"))
 
 # Neo4j Configuration
 NEO4J_URI = os.getenv("NEO4J_URI", "bolt://neo4j:7687")
@@ -27,3 +29,6 @@ MAX_WORKERS = int(os.getenv("MAX_WORKERS", "4"))
 # Data Paths
 DATA_RAW_DIR = os.getenv("DATA_RAW_DIR", "/app/data/raw")
 DATA_PROCESSED_DIR = os.getenv("DATA_PROCESSED_DIR", "/app/data/processed")
+
+# Reports / outputs
+REPORTS_DIR = os.getenv("REPORTS_DIR", "/app/reports")
