@@ -1,0 +1,22 @@
+[
+  {
+    "imdb_id": "tt0000001",
+    "title": "Fear House",
+    "plot_synopsis": "A haunted family returns to a house full of secrets and fear.",
+    "tags": ["horror", "haunted house", "family"],
+    "genres": ["horror"],
+    "synopsis_source": "test",
+    "review": "Dark and atmospheric.",
+    "split": "train"
+  },
+  {
+    "imdb_id": "tt0000002",
+    "title": "Revenge Road",
+    "plot_synopsis": "A survivor hunts the people responsible for a brutal crime.",
+    "tags": ["revenge", "crime", "thriller"],
+    "genres": ["thriller", "crime"],
+    "synopsis_source": "test",
+    "review": "Fast and violent.",
+    "split": "validation"
+  }
+]
