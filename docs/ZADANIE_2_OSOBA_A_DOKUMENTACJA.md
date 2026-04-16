@@ -4,7 +4,9 @@
 
 Ten dokument opisuje **zadanie 2 dla osoby A** w sposób możliwie prosty, ale technicznie kompletny. Celem tego etapu projektu jest doprowadzenie do stanu, w którym dane filmowe są już przygotowane, zaimportowane do **Neo4j**, osadzone jako **embeddingi** w **ChromaDB**, a następnie sprawdzone przez zestaw kontrolnych zapytań **Cypher**. Repozytorium zostało uzupełnione tak, aby ten etap miał wyraźny, powtarzalny pipeline i dało się go odtworzyć krok po kroku.
 
-W praktyce ten etap odpowiada za trzy rzeczy. Po pierwsze, baza grafowa **Neo4j** ma przechowywać dane potrzebne do zapytań strukturalnych, takich jak liczenie filmów, filtrowanie po gatunku albo wyszukiwanie po fragmencie tytułu. Po drugie, **ChromaDB** ma przechowywać reprezentacje wektorowe opisów filmów, tak aby dało się wykonywać wyszukiwanie semantyczne, czyli „szukanie po znaczeniu”, a nie tylko po dokładnym słowie. Po trzecie, potrzebny jest prosty i czytelny mechanizm testowy, który pokaże, czy import rzeczywiście zadziałał i czy najważniejsze zapytania zwracają wynik.
+W praktyce ten etap odpowiada za trzy rzeczy. Po pierwsze, baza grafowa **Neo4j** ma przechowywać dane potrzebne do zapytań strukturalnych, takich jak liczenie filmów, filtrowanie po gatunku albo wyszukiwanie po fragmencie tytułu. Po drugie, **ChromaDB** ma przechowywać reprezentacje wektorowe opisów filmów, tak aby dało się wykonywać wyszukiwanie semantyczne, czyli „szukanie po znaczeniu”, a nie tylko po dokładnym słowie. Po trzecie, potrzebny jest prosty i czytelny mechanizm testowy, który pokaże, czy import rzeczywiście zadziałał i czy najważniejsze zapytania zwracają wynik. Ten dokument opisuje już **właściwe zadanie 2**, natomiast elementy związane z przygotowaniem danych wejściowych zostały wydzielone do osobnego pliku `docs/ZADANIE_1_OSOBA_A_PRZYGOTOWANIE_DANYCH.md`.
+
+> Wszystko, co dotyczy generowania pliku `movies_all.json`, należy traktować jako **zadanie 1**, czyli etap przygotowania danych wejściowych.
 
 | Element zadania 2 | Co zostało zrobione |
 |---|---|
@@ -19,7 +21,7 @@ W podziale pracy osoba A odpowiada za warstwę danych i baz danych. To oznacza, 
 
 | Odpowiedzialność | Znaczenie |
 |---|---|
-| Dane wejściowe i ich czyszczenie | Przygotowanie danych do dalszego importu |
+| Przygotowane dane wejściowe z zadania 1 | Punkt startowy dla importu w zadaniu 2 |
 | Neo4j | Relacje i zapytania strukturalne |
 | ChromaDB | Wyszukiwanie semantyczne na podstawie embeddingów |
 | Ollama jako model embeddingowy | Lokalna generacja wektorów bez zewnętrznego API |
@@ -27,7 +29,7 @@ W podziale pracy osoba A odpowiada za warstwę danych i baz danych. To oznacza, 
 
 ## Jak działa cały przepływ
 
-Całość można rozumieć jako trzy kolejne warstwy. Najpierw dane są czyszczone i zamieniane do jednolitego formatu JSON. Następnie te same dane trafiają do dwóch różnych baz, ale z dwóch różnych powodów. **Neo4j** przechowuje strukturę powiązań, czyli węzły i relacje. **ChromaDB** przechowuje znaczeniową reprezentację opisów filmów. Dopiero po zakończeniu obu importów uruchamiamy testy zapytań w Neo4j, aby potwierdzić, że baza nie jest pusta i że można po niej zadawać konkretne pytania.
+Całość można rozumieć jako trzy kolejne warstwy. Najpierw w **zadaniu 1** dane są czyszczone i zamieniane do jednolitego formatu JSON. Następnie w **zadaniu 2** te same dane trafiają do dwóch różnych baz, ale z dwóch różnych powodów. **Neo4j** przechowuje strukturę powiązań, czyli węzły i relacje. **ChromaDB** przechowuje znaczeniową reprezentację opisów filmów. Dopiero po zakończeniu obu importów uruchamiamy testy zapytań w Neo4j, aby potwierdzić, że baza nie jest pusta i że można po niej zadawać konkretne pytania.
 
 > Najważniejsza różnica jest taka, że **Neo4j odpowiada na pytania o strukturę**, a **ChromaDB odpowiada na pytania o podobieństwo semantyczne**.
 
@@ -39,7 +41,7 @@ Poniższa tabela pokazuje najważniejsze katalogi i pliki z punktu widzenia osob
 |---|---|
 | `app/config/config.py` | Centralna konfiguracja projektu, w tym ustawienia Neo4j, ChromaDB i Ollama |
 | `.env.example` | Wzór pliku `.env`, z którego użytkownik tworzy własną konfigurację |
-| `scripts/utils/data_cleaner.py` | Pobieranie i czyszczenie danych, generowanie pliku `movies_all.json` |
+| `scripts/utils/data_cleaner.py` | Etap zadania 1: przygotowanie danych i generowanie pliku `movies_all.json` |
 | `scripts/import/neo4j_importer.py` | Import danych filmowych do Neo4j |
 | `scripts/import/chromadb_importer.py` | Import danych do ChromaDB z lokalnymi embeddingami z Ollama |
 | `scripts/import/neo4j_query_tester.py` | Testy zapytań Cypher i zapis raportu JSON |
@@ -86,11 +88,11 @@ Po tym kroku trzeba zadbać o usługi zewnętrzne. Projekt zakłada użycie **Ne
 | ChromaDB | Port `8000` |
 | Ollama | Port `11434` oraz pobrany model `nomic-embed-text` |
 
-## Jak przygotować dane
+## Zależność od zadania 1
 
-Przed uruchomieniem samego zadania 2 trzeba mieć przygotowany plik `movies_all.json`. To właśnie ten plik jest wejściem dla obu importerów. Generuje go skrypt `scripts/utils/data_cleaner.py`. W uproszczeniu robi on trzy rzeczy: pobiera dane źródłowe, czyści teksty i zapisuje wynik w jednym, spójnym formacie JSON.
+Przed uruchomieniem samego zadania 2 trzeba mieć przygotowany plik `movies_all.json`. To właśnie ten plik jest wejściem dla obu importerów. Samo generowanie tego pliku należy już jednak do **zadania 1** i zostało opisane osobno w dokumencie `docs/ZADANIE_1_OSOBA_A_PRZYGOTOWANIE_DANYCH.md`.
 
-Aby wygenerować dane, uruchom skrypt czyszczący. Po jego zakończeniu w katalogu `data/processed/` powinien pojawić się plik `movies_all.json`. Jeśli tego pliku nie ma, kolejne kroki nie ruszą.
+Na potrzeby zadania 2 wystarczy pamiętać o jednej zasadzie: jeśli `movies_all.json` nie istnieje, to nie jest jeszcze moment na uruchamianie importów. Najpierw trzeba domknąć etap przygotowania danych, a dopiero potem wrócić do tego dokumentu i wykonać pipeline zadania 2.
 
 ## Jak uruchomić zadanie 2
 
@@ -155,7 +157,7 @@ Na końcu warto wykonać prostą checklistę. Jeśli wszystkie poniższe odpowie
 
 | Pytanie kontrolne | Oczekiwany wynik |
 |---|---|
-| Czy istnieje `movies_all.json`? | Tak |
+| Czy istnieje `movies_all.json` przygotowany w zadaniu 1? | Tak |
 | Czy Neo4j przyjmuje import? | Tak |
 | Czy ChromaDB zapisuje dokumenty i embeddingi? | Tak |
 | Czy Ollama ma model `nomic-embed-text`? | Tak |
@@ -171,7 +173,7 @@ Jeśli podczas uruchamiania coś nie działa, najpierw sprawdź usługi i plik `
 | Brak połączenia z Neo4j | Zły adres lub hasło | Sprawdź `NEO4J_URI`, `NEO4J_USER`, `NEO4J_PASSWORD` |
 | Brak połączenia z ChromaDB | Serwis nie działa | Sprawdź port `8000` i kontener/usługę |
 | Brak modelu embeddingowego | `nomic-embed-text` nie został pobrany | Uruchom `ollama pull nomic-embed-text` |
-| Brak `movies_all.json` | Nie uruchomiono `data_cleaner.py` | Najpierw wygeneruj dane |
+| Brak `movies_all.json` | Zadanie 1 nie zostało domknięte albo plik nie został wygenerowany | Najpierw wykonaj etap przygotowania danych opisany w `docs/ZADANIE_1_OSOBA_A_PRZYGOTOWANIE_DANYCH.md` |
 | Puste wyniki testów Cypher | Import nie wgrał danych | Sprawdź logi z `run_all_imports.py` |
 
 ## Jak to się odnosi do całego projektu
@@ -182,7 +184,7 @@ To oznacza, że dobrze wykonane zadanie 2 ma znaczenie nie tylko samo w sobie. O
 
 ## Podsumowanie
 
-Po zmianach repozytorium ma wyraźnie domknięty etap zadania 2 dla osoby A. Import do **Neo4j** jest częścią jednego pipeline’u, import do **ChromaDB** używa jawnie lokalnych embeddingów przez **Ollama**, a testy **Cypher** tworzą raport końcowy. Do tego dochodzą testy automatyczne i kompletna dokumentacja. Dzięki temu ten etap jest nie tylko napisany, ale też bardziej zrozumiały, łatwiejszy do pokazania i łatwiejszy do odtworzenia przez inną osobę.
+Po zmianach repozytorium ma wyraźnie domknięty etap zadania 2 dla osoby A. Import do **Neo4j** jest częścią jednego pipeline’u, import do **ChromaDB** używa jawnie lokalnych embeddingów przez **Ollama**, a testy **Cypher** tworzą raport końcowy. Do tego dochodzą testy automatyczne i kompletna dokumentacja. Dodatkowo treści związane stricte z przygotowaniem danych zostały rozdzielone do osobnego dokumentu dla **zadania 1**, dzięki czemu łatwiej zobaczyć granicę między etapem przygotowania danych a etapem ich importu i testowania.
 
 ## References
 

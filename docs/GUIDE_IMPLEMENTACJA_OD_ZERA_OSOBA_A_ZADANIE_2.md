@@ -2,7 +2,9 @@
 
 ## Wersja dla początkującego developera / studenta
 
-Ten przewodnik tłumaczy **jak samodzielnie zaimplementować zadanie 2 dla osoby A od początku do końca**, nawet jeśli startujesz tylko z wcześniejszej wersji projektu i nie czujesz się jeszcze pewnie w Pythonie, Dockerze, Neo4j, ChromaDB czy Ollama. Został napisany tak, jakbym prowadził Cię przez cały proces przy jednym komputerze: najpierw wyjaśnimy **po co** coś robimy, potem **co dokładnie** trzeba przygotować, a na końcu **jak sprawdzić**, czy działa. 
+Ten przewodnik tłumaczy **jak samodzielnie zaimplementować zadanie 2 dla osoby A od początku do końca**, nawet jeśli startujesz tylko z wcześniejszej wersji projektu i nie czujesz się jeszcze pewnie w Pythonie, Dockerze, Neo4j, ChromaDB czy Ollama. Został napisany tak, jakbym prowadził Cię przez cały proces przy jednym komputerze: najpierw wyjaśnimy **po co** coś robimy, potem **co dokładnie** trzeba przygotować, a na końcu **jak sprawdzić**, czy działa.
+
+Ten plik został uporządkowany tak, aby dotyczył głównie **zadania 2**. Elementy stricte związane z przygotowaniem danych wejściowych, czyli częścią odpowiadającą **zadaniu 1**, zostały wydzielone do osobnego dokumentu `docs/ZADANIE_1_OSOBA_A_PRZYGOTOWANIE_DANYCH.md`.
 
 Ten etap projektu ma jeden bardzo ważny cel: przygotować warstwę danych, z której później będą mogły korzystać kolejne części systemu. Oznacza to, że nie budujemy tutaj jeszcze pełnego „inteligentnego asystenta”, tylko tworzymy jego zaplecze. To zaplecze składa się z trzech filarów. Pierwszym jest **Neo4j**, czyli baza grafowa przechowująca relacje między encjami. Drugim jest **ChromaDB**, czyli baza wektorowa do wyszukiwania semantycznego. Trzecim jest **Ollama**, które lokalnie generuje embeddingi tekstu bez potrzeby używania zewnętrznego API [1] [2] [3].
 
@@ -18,11 +20,11 @@ Ten etap projektu ma jeden bardzo ważny cel: przygotować warstwę danych, z kt
 
 Zadanie 2 dla osoby A można potraktować jako budowę małego, ale kompletnego pipeline’u danych. Pipeline oznacza ciąg kroków wykonywanych w odpowiedniej kolejności. W tym projekcie kolejność jest taka sama za każdym razem: najpierw przygotowujemy dane, potem importujemy je do **Neo4j**, później tworzymy embeddingi i zapisujemy je w **ChromaDB**, a na końcu wykonujemy testy kontrolne w **Cypher**, żeby upewnić się, że wynik ma sens.
 
-W praktyce implementacja sprowadza się do odpowiedzi na pięć pytań. Po pierwsze, **skąd biorą się dane** i w jakim formacie mają być zapisane. Po drugie, **jak wgrać te dane do Neo4j**. Po trzecie, **jak zamienić opisy filmów na embeddingi**. Po czwarte, **jak zapisać embeddingi w ChromaDB**. Po piąte, **jak zautomatyzować cały proces**, aby jedna osoba mogła uruchomić wszystko jednym poleceniem i dostać raport końcowy.
+W praktyce implementacja sprowadza się do odpowiedzi na pięć pytań. Po pierwsze, **jakich danych wejściowych potrzebuje zadanie 2**. Po drugie, **jak wgrać te dane do Neo4j**. Po trzecie, **jak zamienić opisy filmów na embeddingi**. Po czwarte, **jak zapisać embeddingi w ChromaDB**. Po piąte, **jak zautomatyzować cały proces**, aby jedna osoba mogła uruchomić wszystko jednym poleceniem i dostać raport końcowy.
 
 | Pytanie implementacyjne | Odpowiedź w projekcie |
 |---|---|
-| Skąd biorą się dane? | Z przetworzonego pliku `movies_all.json` |
+| Jakie dane są potrzebne na wejściu? | Przetworzony plik `movies_all.json` przygotowany w zadaniu 1 |
 | Gdzie trafiają dane strukturalne? | Do **Neo4j** |
 | Gdzie trafiają embeddingi? | Do **ChromaDB** |
 | Kto generuje embeddingi? | **Ollama** z modelem `nomic-embed-text` [1] [2] |
@@ -163,24 +165,24 @@ ollama pull nomic-embed-text
 
 To nie jest detal techniczny, tylko absolutnie kluczowy etap. Jeśli model nie zostanie pobrany, import do ChromaDB nie stworzy embeddingów, bo nie będzie miał czym ich generować [1].
 
-## 9. Krok szósty — przygotowanie danych wejściowych
+## 9. Krok szósty — wejście z zadania 1
 
-Dane wejściowe w tym zadaniu muszą zostać przygotowane do wspólnego formatu JSON. Właśnie za to odpowiada `scripts/utils/data_cleaner.py`. Jego rola polega na tym, aby dane ze źródeł wejściowych sprowadzić do spójnej struktury, którą potem rozumie zarówno importer Neo4j, jak i importer ChromaDB.
-
-Uruchomienie skryptu czyszczącego ma sens tylko wtedy, gdy rozumiesz, jaki artefakt powinien powstać na końcu. Tym artefaktem jest plik:
+Zadanie 2 nie zaczyna się od pobierania albo czyszczenia danych, tylko od użycia **gotowego pliku wejściowego** przygotowanego wcześniej w **zadaniu 1**. Tym plikiem jest:
 
 ```text
 data/processed/movies_all.json
 ```
 
-To jest centralny punkt wejścia dla całego zadania 2. Jeśli ten plik nie istnieje, `run_all_imports.py` zakończy się błędem. W samym skrypcie widać to wprost: pipeline sprawdza obecność `movies_all.json` zanim przejdzie dalej.
+Jeśli chcesz odtworzyć sam etap przygotowania danych, zajrzyj do osobnego dokumentu `docs/ZADANIE_1_OSOBA_A_PRZYGOTOWANIE_DANYCH.md`. Ten przewodnik skupia się już na tym, co dzieje się **po wygenerowaniu** `movies_all.json`.
+
+Na potrzeby zadania 2 trzeba rozumieć tylko jedną kluczową zasadę: ten plik jest **kontraktem wejściowym** dla importerów. Jeśli go nie ma, `run_all_imports.py` słusznie zakończy się błędem i nie powinno się tego omijać „na siłę”.
 
 | Etap | Oczekiwany wynik |
 |---|---|
-| Uruchomienie czyszczenia danych | Powstaje plik `movies_all.json` |
-| Brak pliku | Pipeline zatrzymuje się przed importem |
+| Zadanie 1 zakończone poprawnie | Istnieje plik `movies_all.json` |
+| Brak pliku wejściowego | Pipeline zadania 2 zatrzymuje się przed importem |
 
-Dla początkującego ważne jest, aby rozumieć, że ten plik jest **kontraktem między etapami**. Etap przygotowania danych kończy się na wygenerowaniu JSON-a, a kolejne etapy zakładają, że format tego pliku jest poprawny.
+Dla początkującego ważne jest, aby rozumieć, że ten plik jest **granicą między zadaniem 1 a zadaniem 2**. Zadanie 1 kończy się na wygenerowaniu JSON-a, a zadanie 2 zaczyna się od wykorzystania tego JSON-a.
 
 ## 10. Krok siódmy — jak działa import do Neo4j
 
@@ -275,8 +277,8 @@ Jeśli miałbyś odtworzyć całość od wcześniejszej wersji repozytorium, bez
 |---|---|---|
 | 1 | Zrozumieć wymaganie i rolę osoby A | Bez tego nie wiadomo, co naprawdę budować |
 | 2 | Uporządkować `.env.example` i konfigurację | Kod bez poprawnej konfiguracji nie ruszy |
-| 3 | Upewnić się, że działa przygotowanie danych | Wszystkie dalsze etapy zależą od `movies_all.json` |
-| 4 | Doprowadzić do stabilnego importu Neo4j | To pierwszy filar danych |
+| 3 | Domknąć zadanie 1 i upewnić się, że istnieje `movies_all.json` | Wszystkie dalsze etapy zależą od poprawnego wejścia |
+| 4 | Doprowadzić do stabilnego importu Neo4j | To pierwszy filar danych w zadaniu 2 |
 | 5 | Dodać jawny importer ChromaDB z Ollama | To główny punkt zadania 2 |
 | 6 | Napisać tester zapytań Cypher | To daje dowód, że dane są używalne |
 | 7 | Spiąć wszystko w `run_all_imports.py` | Automatyzuje uruchamianie całości |
@@ -312,7 +314,7 @@ Warto znać typowe pułapki, bo wtedy dużo szybciej zauważysz, co poszło nie 
 | Problem | Co zwykle naprawdę oznacza | Jak diagnozować |
 |---|---|---|
 | `Connection refused` | Usługa nie działa lub adres jest zły | Sprawdź kontenery, porty i hosty |
-| Brak `movies_all.json` | Pipeline został uruchomiony za wcześnie | Najpierw wykonaj etap czyszczenia danych |
+| Brak `movies_all.json` | Pipeline zadania 2 został uruchomiony zanim domknięto zadanie 1 | Najpierw wykonaj etap przygotowania danych opisany w `docs/ZADANIE_1_OSOBA_A_PRZYGOTOWANIE_DANYCH.md` |
 | ChromaDB działa, ale brak sensownych wyników | Dokumenty lub embeddingi są źle przygotowane | Sprawdź, jak budowany jest tekst dokumentu |
 | Neo4j ma mało danych albo ich nie ma | Import nie wgrał pełnego zestawu rekordów | Sprawdź logi importera i statystyki |
 | `pytest` nie przechodzi | Zmiana zepsuła logikę albo importy modułów | Czytaj pierwszy błąd od góry, nie ostatni |
@@ -333,7 +335,7 @@ To jest też powód, dla którego warto pisać dokumentację „jak dla początk
 
 ## 22. Minimalna checklista końcowa
 
-Na sam koniec przed oddaniem pracy sprawdź poniższe rzeczy. To jest prosty, ale bardzo praktyczny rytuał jakościowy.
+Na sam koniec przed oddaniem pracy sprawdź poniższe rzeczy. To jest prosty, ale bardzo praktyczny rytuał jakościowy. Pierwszy punkt checklisty specjalnie odwołuje się do zadania 1, bo bez poprawnego wejścia nie da się uczciwie ocenić zadania 2.
 
 | Pytanie kontrolne | Odpowiedź, której oczekujesz |
 |---|---|
